@@ -16,7 +16,6 @@ export class SignInAdminDto {
     description: 'Password of admin',
     example: 'jhondoe007!A',
   })
-  @IsStrongPassword()
   @IsNotEmpty()
   password: string;
 }
