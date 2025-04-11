@@ -110,12 +110,6 @@ export class GroupService {
         group_members: { include: { user: true } },
       },
     });
-    await this.redis.set(
-      redisKey,
-      JSON.stringify(allGroups),
-      'EX',
-      config.REDIS_EX_TIME,
-    );
     const groupsWithStudents = allGroups.map(group => {
       const students = group.group_members.filter(
         member => member.user.role === 'STUDENT'
@@ -125,7 +119,13 @@ export class GroupService {
         group_members: students,
       };
     });
-
+    
+    await this.redis.set(
+      redisKey,
+      JSON.stringify(groupsWithStudents),
+      'EX',
+      config.REDIS_EX_TIME,
+    );
     return {
       status: HttpStatus.OK,
       message: 'success',
@@ -134,35 +134,39 @@ export class GroupService {
   }
 
   async findOneGroup(groupId: string) {
-    const groupMember = await this.prismaService.groups.findFirst({
+    const group = await this.prismaService.groups.findFirst({
       where: { group_id: groupId },
       include: {
         course: true,
         teacher: true,
-      },
-    });
-    if (!groupMember) {
-      throw new NotFoundException('Group not found!');
-    }
-
-    const studentMembers = await this.prismaService.groupMembers.findMany({
-      where: {
-        group_id: groupId,
-        user: {
-          role: 'STUDENT',
+        group_members: {
+          include: {
+            user: true,
+          },
         },
       },
-      include: {
-        user: true,
-      },
     });
-    
+  
+    if (!group) {
+      throw new NotFoundException('Group not found!');
+    }
+  
+    const students = group.group_members.filter(
+      member => member.user.role === 'STUDENT'
+    );
+  
+    const groupWithStudents = {
+      ...group,
+      group_members: students,
+    };
+  
     return {
       status: HttpStatus.OK,
       message: 'success',
-      data: groupMember,
+      data: groupWithStudents,
     };
   }
+  
 
   async updateGroup(groupId: string, updateGroupDto: UpdateGroupDto) {
     const group = await this.prismaService.groups.findUnique({
