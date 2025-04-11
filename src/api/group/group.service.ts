@@ -20,7 +20,9 @@ export class GroupService {
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
   ) {}
 
-  private transformCreateDtoToPrisma(createGroupDto: CreateGroupDto): Prisma.GroupsCreateInput {
+  private transformCreateDtoToPrisma(
+    createGroupDto: CreateGroupDto,
+  ): Prisma.GroupsCreateInput {
     return {
       name: createGroupDto.name,
       description: createGroupDto.description,
@@ -38,11 +40,15 @@ export class GroupService {
     };
   }
 
-  private transformUpdateDtoToPrisma(updateGroupDto: UpdateGroupDto): Prisma.GroupsUpdateInput {
+  private transformUpdateDtoToPrisma(
+    updateGroupDto: UpdateGroupDto,
+  ): Prisma.GroupsUpdateInput {
     const updateData: Prisma.GroupsUpdateInput = {};
     if (updateGroupDto.name) updateData.name = updateGroupDto.name;
-    if (updateGroupDto.description) updateData.description = updateGroupDto.description;
-    if (updateGroupDto.status) updateData.status = updateGroupDto.status as GroupStatus;
+    if (updateGroupDto.description)
+      updateData.description = updateGroupDto.description;
+    if (updateGroupDto.status)
+      updateData.status = updateGroupDto.status as GroupStatus;
     if (updateGroupDto.course_id) {
       updateData.course = {
         connect: {
@@ -60,7 +66,7 @@ export class GroupService {
     return updateData;
   }
 
-  async createGroup(createGroupDto: CreateGroupDto) { 
+  async createGroup(createGroupDto: CreateGroupDto) {
     const isBeenGroup = await this.prismaService.groups.findFirst({
       where: { name: createGroupDto.name },
     });
@@ -70,17 +76,17 @@ export class GroupService {
 
     // Verify that the course exists
     const course = await this.prismaService.course.findUnique({
-      where: { course_id: createGroupDto.course_id }
+      where: { course_id: createGroupDto.course_id },
     });
     if (!course) {
       throw new NotFoundException('Course not found');
     }
-    
+
     const prismaData = this.transformCreateDtoToPrisma(createGroupDto);
     const newGroup = await this.prismaService.groups.create({
       data: prismaData,
     });
-    
+
     return {
       status: HttpStatus.CREATED,
       message: 'New group created',
@@ -98,6 +104,11 @@ export class GroupService {
     const allGroups = await this.prismaService.groups.findMany({
       skip,
       take: limit,
+      include: {
+        course: true,
+        teacher: true,
+        group_members: { include: { user: true } },
+      },
     });
     await this.redis.set(
       redisKey,
@@ -116,7 +127,11 @@ export class GroupService {
   async findOneGroup(groupId: string) {
     const groupMember = await this.prismaService.groups.findFirst({
       where: { group_id: groupId },
-      include: { group_members: true },
+      include: {
+        course: true,
+        teacher: true,
+        group_members: { include: { user: true } },
+      },
     });
     if (!groupMember) {
       throw new NotFoundException('Group not found!');
@@ -132,7 +147,7 @@ export class GroupService {
     const group = await this.prismaService.groups.findUnique({
       where: { group_id: groupId },
     });
-    
+
     if (!group) {
       throw new NotFoundException('Group not found');
     }
