@@ -116,11 +116,20 @@ export class GroupService {
       'EX',
       config.REDIS_EX_TIME,
     );
+    const groupsWithStudents = allGroups.map(group => {
+      const students = group.group_members.filter(
+        member => member.user.role === 'STUDENT'
+      );
+      return {
+        ...group,
+        group_members: students,
+      };
+    });
 
     return {
       status: HttpStatus.OK,
       message: 'success',
-      data: allGroups,
+      data: groupsWithStudents, 
     };
   }
 
@@ -130,12 +139,24 @@ export class GroupService {
       include: {
         course: true,
         teacher: true,
-        group_members: { include: { user: true } },
       },
     });
     if (!groupMember) {
       throw new NotFoundException('Group not found!');
     }
+
+    const studentMembers = await this.prismaService.groupMembers.findMany({
+      where: {
+        group_id: groupId,
+        user: {
+          role: 'STUDENT',
+        },
+      },
+      include: {
+        user: true,
+      },
+    });
+    
     return {
       status: HttpStatus.OK,
       message: 'success',

@@ -17,6 +17,8 @@ export class GroupMembersService {
   ) {}
 
   async create(createGroupMemberDto: CreateGroupMemberDto) {
+    console.log(createGroupMemberDto);
+    
     const user = await this.prisma.user.findUnique({
       where: { user_id: createGroupMemberDto.userId },
     });

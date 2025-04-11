@@ -54,38 +54,46 @@ export class GroupMembersController {
         group: true,
       },
     });
-  
+
     if (!member) {
       throw new NotFoundException('Group member not found');
     }
-  
-    return member; // To'g'ri formatda qaytariladi
+
+    return member;
   }
 
   @Post()
   @ApiOperation({ summary: 'Create new group member' })
-  async create(createGroupMemberDto: CreateGroupMemberDto): Promise<GroupMembers> {
-    return this.prisma.groupMembers.create({
-      data: {
-        group_id: createGroupMemberDto.groupId,
-        user_id: createGroupMemberDto.userId,
-      },
-      include: {
-        user: true,
-        group: true,
-      },
-    });
+  async create(
+    @Body() createGroupMemberDto: CreateGroupMemberDto,
+  ) {
+    console.log(createGroupMemberDto);
+    
+    // return this.prisma.groupMembers.create({
+    //   data: {
+    //     group_id: createGroupMemberDto.groupId,
+    //     user_id: createGroupMemberDto.userId,
+    //   },
+    //   include: {
+    //     user: true,
+    //     group: true,
+    //   },
+    // });
+    return this.groupMembersService.create(createGroupMemberDto);
   }
   @Put(':id')
   @ApiOperation({ summary: 'Update group member' })
-  async update(id: string, updateGroupMemberDto: UpdateGroupMemberDto): Promise<GroupMembers> {
+  async update(
+    id: string,
+    updateGroupMemberDto: UpdateGroupMemberDto,
+  ): Promise<GroupMembers> {
     const member = await this.prisma.groupMembers.findUnique({
       where: { group_members_id: id },
     });
     if (!member) {
       throw new NotFoundException('Group member not found');
     }
-  
+
     return this.prisma.groupMembers.update({
       where: { group_members_id: id },
       data: {
@@ -112,7 +120,15 @@ export class GroupMembersController {
 export class groupMembersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<{ group_members_id: string; group_id: string; user_id: string; created_at: Date; updated_at: Date; }[]> {
+  async findAll(): Promise<
+    {
+      group_members_id: string;
+      group_id: string;
+      user_id: string;
+      created_at: Date;
+      updated_at: Date;
+    }[]
+  > {
     return this.prisma.groupMembers.findMany({
       include: {
         user: true,
@@ -137,7 +153,9 @@ export class groupMembersService {
     return member;
   }
 
-  async create(createGroupMemberDto: CreateGroupMemberDto): Promise<GroupMembers> {
+  async create(
+    createGroupMemberDto: CreateGroupMemberDto,
+  ): Promise<GroupMembers> {
     return this.prisma.groupMembers.create({
       data: {
         group_id: createGroupMemberDto.groupId,
@@ -150,7 +168,10 @@ export class groupMembersService {
     });
   }
 
-  async update(id: string, updateGroupMemberDto: UpdateGroupMemberDto): Promise<GroupMembers> {
+  async update(
+    id: string,
+    updateGroupMemberDto: UpdateGroupMemberDto,
+  ): Promise<GroupMembers> {
     const member = await this.prisma.groupMembers.findUnique({
       where: { group_members_id: id },
     });

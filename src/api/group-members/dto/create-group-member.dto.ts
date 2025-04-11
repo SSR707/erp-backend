@@ -1,12 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
 export class CreateGroupMemberDto {
   @ApiProperty({
-    description: 'gtoup id',
+    description: 'group id',
     example: '1234567890abcdef',
     type: String,
     required: true,
   })
+  @IsString()
   groupId: string;
 
   @ApiProperty({
@@ -15,5 +17,6 @@ export class CreateGroupMemberDto {
     type: String,
     required: true,
   })
+  @IsString()
   userId: string;
 }
