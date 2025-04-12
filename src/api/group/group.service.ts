@@ -97,10 +97,14 @@ export class GroupService {
   async findAllGroup(page: number, limit: number) {
     const redisKey = `groups:page:${page}:limit:${limit}`;
     const cachedGroup = await this.redis.get(redisKey);
+
     if (cachedGroup) {
       return JSON.parse(cachedGroup);
     }
+
     const skip = (page - 1) * limit;
+
+    // 🟡 Guruhlar ro'yxati
     const allGroups = await this.prismaService.groups.findMany({
       skip,
       take: limit,
@@ -110,27 +114,41 @@ export class GroupService {
         group_members: { include: { user: true } },
       },
     });
-    const groupsWithStudents = allGroups.map(group => {
+
+    // 🟢 Jami guruhlar soni
+    const totalCount = await this.prismaService.groups.count();
+
+    // 🟡 Faqat student bo'lgan group_members ni ajratib olish
+    const groupsWithStudents = allGroups.map((group) => {
       const students = group.group_members.filter(
-        member => member.user.role === 'STUDENT'
+        (member) => member.user.role === 'STUDENT',
       );
       return {
         ...group,
         group_members: students,
       };
     });
-    
+
+    const response = {
+      status: HttpStatus.OK,
+      message: 'success',
+      data: groupsWithStudents,
+      meta: {
+        totalCount, // ➕ jami guruhlar soni
+        page,
+        limit,
+      },
+    };
+
+    // 🧊 Redisga saqlash
     await this.redis.set(
       redisKey,
-      JSON.stringify(groupsWithStudents),
+      JSON.stringify(response),
       'EX',
       config.REDIS_EX_TIME,
     );
-    return {
-      status: HttpStatus.OK,
-      message: 'success',
-      data: groupsWithStudents, 
-    };
+
+    return response;
   }
 
   async findOneGroup(groupId: string) {
@@ -146,27 +164,26 @@ export class GroupService {
         },
       },
     });
-  
+
     if (!group) {
       throw new NotFoundException('Group not found!');
     }
-  
+
     const students = group.group_members.filter(
-      member => member.user.role === 'STUDENT'
+      (member) => member.user.role === 'STUDENT',
     );
-  
+
     const groupWithStudents = {
       ...group,
       group_members: students,
     };
-  
+
     return {
       status: HttpStatus.OK,
       message: 'success',
       data: groupWithStudents,
     };
   }
-  
 
   async updateGroup(groupId: string, updateGroupDto: UpdateGroupDto) {
     const group = await this.prismaService.groups.findUnique({

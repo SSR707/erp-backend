@@ -12,6 +12,8 @@ export type ConfigType = {
   REFRESH_TOKEN_KEY: string;
   REFRESH_TOKEN_TIME: string;
   REDIS_EX_TIME: number;
+  REDIS_HOST: string;
+  REDIS_PORT: string;
   // FILE_PATH: string;
 };
 
@@ -52,5 +54,7 @@ export const config: ConfigType = {
   REFRESH_TOKEN_KEY: process.env.REFRESH_TOKEN_KEY,
   REFRESH_TOKEN_TIME: process.env.REFRESH_TOKEN_TIME,
   REDIS_EX_TIME: +process.env.REDIS_EX_TIME,
+  REDIS_HOST: process.env.REDIS_HOST,
+  REDIS_PORT: process.env.REDIS_PORT,
   // FILE_PATH: process.env.FILE_PATH,
 };

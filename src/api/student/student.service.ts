@@ -26,21 +26,23 @@ export class StudentService {
 
   async findAll(page: number, limit: number) {
     const skip = (page - 1) * limit;
+  
+    // 🟡 Studentlar va jami studentlar sonini parallel olish
     const [students, total] = await Promise.all([
       this.prisma.user.findMany({
         skip,
         take: limit,
-        where: { role: 'STUDENT' },
+        where: { role: 'STUDENT' }, // 🎯 Faqat studentlar
         include: {
           group_members: {
             include: {
               group: {
                 include: {
-                  course: true,
+                  course: true, // 🧾 Kurs haqida ma'lumot
                   teacher: {
                     select: {
                       user_id: true,
-                      full_name: true,
+                      full_name: true, // 👨‍🏫 O'qituvchi ismi
                     },
                   },
                 },
@@ -49,9 +51,12 @@ export class StudentService {
           },
         },
       }),
-      this.prisma.user.count({ where: { role: 'STUDENT' } }),
+      this.prisma.user.count({
+        where: { role: 'STUDENT' }, // 🔢 Jami studentlar soni
+      }),
     ]);
-
+  
+    // 📤 Javobni shakllantirish
     return {
       data: students,
       meta: {
@@ -61,6 +66,7 @@ export class StudentService {
       },
     };
   }
+  
 
   async findOne(id: string) {
     const student = await this.prisma.user.findUnique({
