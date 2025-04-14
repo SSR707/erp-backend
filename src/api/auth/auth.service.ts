@@ -98,6 +98,7 @@ export class AuthService {
         refresh_token_expire:
           this.configService.get<string>('REFRESH_TOKEN_TIME'),
       },
+      user: user,
     };
   }
 
