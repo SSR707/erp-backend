@@ -1,7 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
-
 }
 
 datasource db {
@@ -9,35 +8,70 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
   full_name         String?
-  username           String         @unique
+  username          String              @unique
   password          String
-  role              UserRole   
-  created_at        DateTime       @default(now())
-  updated_at        DateTime       @updatedAt
-  user_id           String         @id @default(uuid())
+  role              UserRole
+  gender            Gender
+  data_of_birth     DateTime
+  created_at        DateTime            @default(now())
+  updated_at        DateTime            @updatedAt
+  user_id           String              @id @default(uuid())
   group_members     GroupMembers[]
-  groups            Groups[]       @relation("TeacherGroups")
-  gradedSubmissions Submissions[]  @relation("GraderSubmissions")
-  submissions       Submissions[]  @relation("StudentSubmissions")
+  groups            Groups[]            @relation("TeacherGroups")
+  gradedSubmissions Submissions[]       @relation("GraderSubmissions")
+  submissions       Submissions[]       @relation("StudentSubmissions")
+  PaymentForStudent PaymentForStudent[]
+  PaymentForTeacher PaymentForTeacher[]
+  images            images[]
 }
 
 model Groups {
-  group_id      String         @id @default(uuid())
-  name          String         @unique
-  description   String
-  course        Course         @relation(fields: [course_id], references: [course_id])
-  course_id     String
-  teacher_id    String
-  teacher       User           @relation("TeacherGroups", fields: [teacher_id], references: [user_id])
-  status        GroupStatus    @default(ACTIVE)
-  created_at    DateTime       @default(now())
-  updated_at    DateTime       @updatedAt
-  group_members GroupMembers[]
-  lessons       Lessons[]
-  schedules     Schedule[]
+  group_id          String              @id @default(uuid())
+  name              String              @unique
+  description       String
+  course            Course              @relation(fields: [course_id], references: [course_id])
+  course_id         String
+  teacher_id        String
+  teacher           User                @relation("TeacherGroups", fields: [teacher_id], references: [user_id])
+  status            GroupStatus         @default(ACTIVE)
+  created_at        DateTime            @default(now())
+  updated_at        DateTime            @updatedAt
+  group_members     GroupMembers[]
+  lessons           Lessons[]
+  schedules         Schedule[]
+  PaymentForStudent PaymentForStudent[]
+}
+
+model PaymentForStudent {
+  payment_id String      @id @default(uuid())
+  type       PaymentType
+  sum        Int
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+  student_id String
+  student    User?       @relation(fields: [student_id], references: [user_id])
+  group_id   String
+  group      Groups      @relation(fields: [group_id], references: [group_id])
+}
+
+model PaymentForTeacher {
+  payment_id String      @id @default(uuid())
+  type       PaymentType
+  sum        Int
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+  teacher_id String
+  teacher    User?       @relation(fields: [teacher_id], references: [user_id])
+}
+
+model images {
+  image_id  String  @id @default(uuid())
+  url       String
+  is_worked Boolean
+  user_id   String
+  user      User    @relation(fields: [user_id], references: [user_id])
 }
 
 model GroupMembers {
@@ -89,26 +123,26 @@ model Submissions {
 }
 
 model Course {
-  course_id    String   @id @default(uuid())
-  name         String   @unique
-  description  String
-  duration     Int
-  status       CourseStatus @default(ACTIVE)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-  groups       Groups[]
+  course_id   String       @id @default(uuid())
+  name        String       @unique
+  description String
+  duration    Int
+  status      CourseStatus @default(ACTIVE)
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+  groups      Groups[]
 }
 
 model Schedule {
-  schedule_id   String   @id @default(uuid())
-  group_id      String
-  day_of_week   Int
-  start_time    DateTime
-  end_time      DateTime
-  room          String?
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-  group         Groups   @relation(fields: [group_id], references: [group_id])
+  schedule_id String   @id @default(uuid())
+  group_id    String
+  day_of_week Int
+  start_time  DateTime
+  end_time    DateTime
+  room        String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  group       Groups   @relation(fields: [group_id], references: [group_id])
 }
 
 enum UserRole {
@@ -140,4 +174,9 @@ enum AttendanceStatus {
   ABSENT
   LATE
   EXCUSED
+}
+
+enum PaymentType {
+  CASH
+  CREDIT_CARD
 }
