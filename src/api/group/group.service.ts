@@ -87,6 +87,11 @@ export class GroupService {
       data: prismaData,
     });
 
+    const keys = await this.redis.keys('groups:page:*');
+    if (keys.length) {
+      await this.redis.del(...keys);
+    }
+
     return {
       status: HttpStatus.CREATED,
       message: 'New group created',

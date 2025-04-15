@@ -15,6 +15,8 @@ import { CourseModule } from './course/course.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { RedisModule } from './redis/redis.module';
 import { GroupMembersModule } from './group-members/group-members.module';
+import { PaymentStudentModule } from './payment-for-student/payment-student.module';
+import { PaymentTeacherModule } from './payment-for-teacher/payment-teacher.module';
 
 
 @Module({
@@ -40,6 +42,8 @@ import { GroupMembersModule } from './group-members/group-members.module';
     DashboardModule,
     RedisModule,
     GroupMembersModule,
+    PaymentStudentModule,
+    PaymentTeacherModule
 
   ],
   providers: [

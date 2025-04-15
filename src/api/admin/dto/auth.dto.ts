@@ -1,39 +1,65 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, MinLength, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  MinLength,
+  IsEnum,
+  IsDateString,
+  IsOptional,
+  IsStrongPassword,
+} from 'class-validator';
 
 import { UserRole } from '@prisma/client';
-
+import { UserGender } from 'src/common/enum';
 
 export class RegisterDto {
   @ApiProperty({
-    description: 'Foydalanuvchi to\'liq ismi',
-    example: 'John Doe'
+    type: String,
+    description: 'FullName of student',
+    example: 'Jhon Doe',
   })
   @IsString()
   @IsNotEmpty()
   full_name: string;
 
   @ApiProperty({
-    description: 'Foydalanuvchi nomi',
-    example: 'johndoe'
+    type: String,
+    description: 'Username of student',
+    example: 'jhondoe007',
   })
   @IsString()
   @IsNotEmpty()
   username: string;
 
   @ApiProperty({
-    description: 'Parol (minimum 6 ta belgi)',
-    example: 'password123'
+    type: String,
+    description: 'Password of student',
+    example: 'jhondoe007!A',
   })
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(6)
+  @IsStrongPassword()
+  @IsOptional()
   password: string;
 
   @ApiProperty({
+    type: String,
+    description: 'Gender of student',
+    example: 'MALE',
+    enum: UserGender,
+  })
+  @IsEnum(UserGender)
+  gender: UserGender;
+
+  @ApiProperty({
+    type: String,
+    description: 'Date of birth of student',
+    example: '2005-05-15',
+  })
+  @IsDateString()
+  data_of_birth: string;
+  @ApiProperty({
     description: 'Foydalanuvchi roli',
     enum: UserRole,
-    example: UserRole.ADMIN
+    example: UserRole.ADMIN,
   })
   @IsEnum(UserRole)
   role: UserRole;
@@ -42,7 +68,7 @@ export class RegisterDto {
 export class LoginDto {
   @ApiProperty({
     description: 'Foydalanuvchi nomi',
-    example: 'johndoe'
+    example: 'johndoe',
   })
   @IsString()
   @IsNotEmpty()
@@ -50,7 +76,7 @@ export class LoginDto {
 
   @ApiProperty({
     description: 'Parol',
-    example: 'password123'
+    example: 'password123',
   })
   @IsString()
   @IsNotEmpty()
