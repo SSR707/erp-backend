@@ -85,6 +85,7 @@ export class AuthController {
     return this.authService.confirmPassword(id, confirmPasswordDto);
   }
 
+  @Public()
   @Post('refresh')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Refresh access token' })
