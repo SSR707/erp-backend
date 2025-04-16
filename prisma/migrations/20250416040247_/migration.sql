@@ -13,12 +13,17 @@ CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE');
 -- CreateEnum
 CREATE TYPE "AttendanceStatus" AS ENUM ('PRESENT', 'ABSENT', 'LATE', 'EXCUSED');
 
+-- CreateEnum
+CREATE TYPE "PaymentType" AS ENUM ('CASH', 'CREDIT_CARD');
+
 -- CreateTable
 CREATE TABLE "User" (
     "full_name" TEXT,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "role" "UserRole" NOT NULL,
+    "gender" "Gender" NOT NULL,
+    "data_of_birth" TIMESTAMP(3) NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "user_id" TEXT NOT NULL,
@@ -38,6 +43,41 @@ CREATE TABLE "Groups" (
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Groups_pkey" PRIMARY KEY ("group_id")
+);
+
+-- CreateTable
+CREATE TABLE "PaymentForStudent" (
+    "payment_id" TEXT NOT NULL,
+    "type" "PaymentType" NOT NULL,
+    "sum" INTEGER NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "student_id" TEXT NOT NULL,
+    "group_id" TEXT NOT NULL,
+
+    CONSTRAINT "PaymentForStudent_pkey" PRIMARY KEY ("payment_id")
+);
+
+-- CreateTable
+CREATE TABLE "PaymentForTeacher" (
+    "payment_id" TEXT NOT NULL,
+    "type" "PaymentType" NOT NULL,
+    "sum" INTEGER NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "teacher_id" TEXT NOT NULL,
+
+    CONSTRAINT "PaymentForTeacher_pkey" PRIMARY KEY ("payment_id")
+);
+
+-- CreateTable
+CREATE TABLE "images" (
+    "image_id" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "is_worked" BOOLEAN NOT NULL,
+    "user_id" TEXT NOT NULL,
+
+    CONSTRAINT "images_pkey" PRIMARY KEY ("image_id")
 );
 
 -- CreateTable
@@ -132,6 +172,18 @@ ALTER TABLE "Groups" ADD CONSTRAINT "Groups_course_id_fkey" FOREIGN KEY ("course
 
 -- AddForeignKey
 ALTER TABLE "Groups" ADD CONSTRAINT "Groups_teacher_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PaymentForStudent" ADD CONSTRAINT "PaymentForStudent_student_id_fkey" FOREIGN KEY ("student_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PaymentForStudent" ADD CONSTRAINT "PaymentForStudent_group_id_fkey" FOREIGN KEY ("group_id") REFERENCES "Groups"("group_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PaymentForTeacher" ADD CONSTRAINT "PaymentForTeacher_teacher_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "images" ADD CONSTRAINT "images_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "GroupMembers" ADD CONSTRAINT "GroupMembers_group_id_fkey" FOREIGN KEY ("group_id") REFERENCES "Groups"("group_id") ON DELETE RESTRICT ON UPDATE CASCADE;

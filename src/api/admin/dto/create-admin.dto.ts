@@ -1,8 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, IsStrongPassword } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsStrongPassword,
+} from 'class-validator';
 import { UserGender } from 'src/common/enum';
 
 export class CreateAdminDto {
+  @ApiProperty({
+    type: String,
+    description: 'Image of admin',
+    example: '.jpg',
+  })
+  @IsString()
+  @IsNotEmpty()
+  image_url: string;
+
   @ApiProperty({
     type: String,
     description: 'FullName of student',

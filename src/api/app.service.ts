@@ -3,13 +3,15 @@ import { HttpStatus, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { CustomLogger } from '../infrastructure/lib/custom-logger/logger.service';
+import * as path from 'path';
+import * as express from 'express';
 // import { AllExceptionsFilter } from '../infrastructure';
 // import { config } from '../config';
 
 export default class Application {
   public static async main(): Promise<void> {
     const app = await NestFactory.create(AppModule);
-    app.enableCors({origin: '*'})
+    app.enableCors({ origin: '*' });
     const logger = app.get(CustomLogger);
     // app.useGlobalFilters(new AllExceptionsFilter());
     app.useGlobalPipes(
@@ -19,6 +21,7 @@ export default class Application {
         errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
       }),
     );
+    app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
     const api = 'api/v1';
     const swaggerApi = 'api/docs';
     app.setGlobalPrefix(api);
