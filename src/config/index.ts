@@ -14,6 +14,7 @@ export type ConfigType = {
   REDIS_EX_TIME: number;
   REDIS_HOST: string;
   REDIS_PORT: string;
+  API_URL: string;
   // FILE_PATH: string;
 };
 
@@ -27,6 +28,8 @@ const requiredVariables = [
   'REFRESH_TOKEN_KEY',
   'REFRESH_TOKEN_TIME',
   'REDIS_EX_TIME',
+  'LOCAL_API',
+  'SERVER_API',
   // 'FILE_PATH',
 ];
 
@@ -49,6 +52,10 @@ export const config: ConfigType = {
     process.env.NODE_ENV === 'dev'
       ? process.env.DEV_DB_URL
       : process.env.PROD_DB_URL,
+  API_URL:
+    process.env.NODE_ENV === 'dev'
+      ? process.env.LOCAL_API
+      : process.env.SERVER_API,
   ACCESS_TOKEN_KEY: process.env.ACCESS_TOKEN_KEY,
   ACCESS_TOKEN_TIME: process.env.ACCESS_TOKEN_TIME,
   REFRESH_TOKEN_KEY: process.env.REFRESH_TOKEN_KEY,

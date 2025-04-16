@@ -11,6 +11,8 @@ import {
   Query,
   DefaultValuePipe,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
@@ -18,6 +20,8 @@ import { UpdateAdminDto } from './dto/update-admin.dto';
 import { SignInAdminDto } from './dto/signin-admin.dto';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -27,6 +31,7 @@ import { Public } from 'src/common/decorator/auth.decorator';
 import { AdminGuard } from 'src/common/guard/admin.guard';
 import { AddMemberDto } from './dto/add-memberdto';
 import { UserID } from 'src/common/decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Admin Api')
 @Controller('admin')
@@ -160,7 +165,7 @@ export class AdminController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
   ) {
-    return this.adminService.findAll(page , limit);
+    return this.adminService.findAll(page, limit);
   }
 
   @ApiOperation({
@@ -234,6 +239,75 @@ export class AdminController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.adminService.findOne(id);
+  }
+
+  @ApiOperation({
+    summary: 'Upload Admin image',
+    description: 'Upload an image file for a specific admin',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Image file to upload',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'image added successfully',
+    schema: {
+      example: {
+        status_code: HttpStatus.CREATED,
+        message: 'Admim image successfully created.',
+        data: {
+          image_url: '.png or jpg',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Uuid Id cannot be parsed',
+    schema: {
+      example: {
+        message: 'Validation failed (uuid is expected)',
+        error: 'Bad Request',
+        statusCode: HttpStatus.BAD_REQUEST,
+      },
+    },
+  })
+  @UseGuards(AdminGuard)
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('file'))
+  @Post('upload-image')
+  uploadImga(@UploadedFile() file: Express.Multer.File) {
+    return this.adminService.imageUpload(file);
+  }
+
+  @ApiOperation({
+    summary: 'clean Images',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Admin Images clean   successfully',
+    schema: {
+      example: {
+        status: HttpStatus.OK,
+        message: 'success',
+      },
+    },
+  })
+  @UseGuards(AdminGuard)
+  @ApiBearerAuth()
+  @Delete('cleanUpUntrackedImages')
+  cleanUpUntrackedImages() {
+    return this.adminService.cleanUpUntrackedImages();
   }
 
   @ApiOperation({
