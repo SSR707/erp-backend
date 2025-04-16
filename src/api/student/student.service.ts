@@ -13,6 +13,7 @@ export class StudentService {
 
   async create(createStudentDto: CreateStudentDto) {
     try {
+      createStudentDto.data_of_birth = new Date(createStudentDto.data_of_birth);
       return await this.prisma.user.create({
         data: {
           ...createStudentDto,
@@ -26,7 +27,7 @@ export class StudentService {
 
   async findAll(page: number, limit: number) {
     const skip = (page - 1) * limit;
-  
+
     // 🟡 Studentlar va jami studentlar sonini parallel olish
     const [students, total] = await Promise.all([
       this.prisma.user.findMany({
@@ -55,7 +56,7 @@ export class StudentService {
         where: { role: 'STUDENT' }, // 🔢 Jami studentlar soni
       }),
     ]);
-  
+
     // 📤 Javobni shakllantirish
     return {
       data: students,
@@ -66,7 +67,6 @@ export class StudentService {
       },
     };
   }
-  
 
   async findOne(id: string) {
     const student = await this.prisma.user.findUnique({

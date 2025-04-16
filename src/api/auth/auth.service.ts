@@ -47,7 +47,7 @@ export class AuthService {
     }
 
     dto.password = await BcryptEncryption.hashPassword(dto.password);
-
+    dto.data_of_birth = new Date(dto.data_of_birth)
     const user = await this.prisma.user.create({
       data: dto,
     });

@@ -71,6 +71,7 @@ export class AdminService {
     createAdminDto.password = await BcryptEncryption.encrypt(
       createAdminDto.password,
     );
+    createAdminDto.data_of_birth = new Date(createAdminDto.data_of_birth)
     const admin = await this.prismaService.user.create({
       data: { ...createAdminDto, role: UserRole.ADMIN },
     });
