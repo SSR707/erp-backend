@@ -61,5 +61,5 @@ export class CreateAdminDto {
     example: '2005-05-15',
   })
   @IsDateString()
-  data_of_birth: string;
+  data_of_birth: string| Date;
 }

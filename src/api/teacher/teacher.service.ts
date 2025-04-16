@@ -13,6 +13,7 @@ export class TeacherService {
 
   async create(createTeacherDto: CreateTeacherDto) {
     try {
+      createTeacherDto.data_of_birth = new Date(createTeacherDto.data_of_birth);
       return await this.prisma.user.create({
         data: {
           ...createTeacherDto,

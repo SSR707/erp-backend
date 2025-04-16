@@ -17,6 +17,7 @@ import { RedisModule } from '../common/redis/redis.module';
 import { GroupMembersModule } from './group-members/group-members.module';
 import { PaymentStudentModule } from './payment-for-student/payment-student.module';
 import { PaymentTeacherModule } from './payment-for-teacher/payment-teacher.module';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -43,7 +44,7 @@ import { PaymentTeacherModule } from './payment-for-teacher/payment-teacher.modu
     GroupMembersModule,
     PaymentStudentModule,
     PaymentTeacherModule,
-
+    StatisticsModule,
   ],
   providers: [
     {
