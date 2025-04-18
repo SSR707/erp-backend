@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, IsStrongPassword } from 'class-validator';
+import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, IsStrongPassword } from 'class-validator';
 import { UserGender } from 'src/common/enum';
 
 export class CreateTeacherDto {
@@ -29,6 +29,28 @@ export class CreateTeacherDto {
   @IsStrongPassword()
   @IsOptional()
   password: string;
+
+  @ApiProperty({
+    type: String,
+    description: 'PhoneNumber of teacher',
+    example: '+998995556656',
+  })
+  @IsPhoneNumber()
+  @IsOptional()
+  phone_number: string;
+
+  
+  @ApiProperty({
+    type: String,
+    description: 'Address of teacher',
+    example: 'Toshkent, Guliston ',
+  })
+  @IsString()
+  @IsNotEmpty()
+  address: string;
+
+
+
 
   @ApiProperty({
     type: String,

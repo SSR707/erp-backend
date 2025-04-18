@@ -7,6 +7,7 @@ import {
   IsDateString,
   IsOptional,
   IsStrongPassword,
+  IsPhoneNumber,
 } from 'class-validator';
 
 import { UserRole } from '@prisma/client';
@@ -48,6 +49,25 @@ export class RegisterDto {
   })
   @IsEnum(UserGender)
   gender: UserGender;
+
+  @ApiProperty({
+    type: String,
+    description: 'PhoneNumber of user',
+    example: '+998995556656',
+  })
+  @IsPhoneNumber()
+  @IsOptional()
+  phone_number: string;
+
+  
+  @ApiProperty({
+    type: String,
+    description: 'Address of user',
+    example: 'Toshkent, Guliston ',
+  })
+  @IsString()
+  @IsNotEmpty()
+  address: string;
 
   @ApiProperty({
     type: String,
