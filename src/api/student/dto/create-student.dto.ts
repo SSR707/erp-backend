@@ -6,8 +6,11 @@ import {
   IsDateString,
   IsEnum,
   IsOptional,
+  IsNumber,
+  IsPositive,
 } from 'class-validator';
-import { UserGender } from 'src/common/enum';
+import { IsPhoneNumber } from 'src/common/decorator';
+import { PaymentEnum, UserGender } from 'src/common/enum';
 
 export class CreateStudentDto {
   @ApiProperty({
@@ -48,9 +51,47 @@ export class CreateStudentDto {
 
   @ApiProperty({
     type: String,
+    description: 'Address of student',
+    example: 'Toshkent, Guliston ',
+  })
+  @IsString()
+  @IsNotEmpty()
+  address: string;
+
+  @ApiProperty({
+    description: 'group id',
+    example: '1234567890abcdef',
+    type: String,
+  })
+  @IsString()
+  groupId: string;
+
+  @ApiProperty({ enum: PaymentEnum, description: 'Type of the payment' })
+  @IsEnum(PaymentEnum, {
+    message: 'type must be a valid PaymentType enum value (CASH, CREDIT_CARD)',
+  })
+  paymentType: PaymentEnum;
+
+  @ApiProperty({ type: Number, description: 'Debt sum', example: 1000 })
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
+  sum: number;
+
+  @ApiProperty({
+    type: String,
+    description: 'PhoneNumber of student ',
+    example: '+998995556656',
+  })
+  @IsPhoneNumber()
+  @IsOptional()
+  phone_number: string;
+
+  @ApiProperty({
+    type: String,
     description: 'Date of birth of student',
     example: '2005-05-15',
   })
   @IsDateString()
-  data_of_birth: string| Date;
+  data_of_birth: string | Date;
 }

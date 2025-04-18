@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsOptional,
+  IsPhoneNumber,
   IsString,
   IsStrongPassword,
 } from 'class-validator';
@@ -54,6 +55,25 @@ export class CreateAdminDto {
   })
   @IsEnum(UserGender)
   gender: UserGender;
+
+  @ApiProperty({
+    type: String,
+    description: 'PhoneNumber of Admin',
+    example: '+998995556656',
+  })
+  @IsPhoneNumber()
+  @IsOptional()
+  phone_number: string;
+
+  
+  @ApiProperty({
+    type: String,
+    description: 'Address of Admin',
+    example: 'Toshkent, Guliston ',
+  })
+  @IsString()
+  @IsNotEmpty()
+  address: string;
 
   @ApiProperty({
     type: String,

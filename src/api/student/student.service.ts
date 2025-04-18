@@ -9,14 +9,17 @@ import {
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
-import { config } from 'src/config';
 import { Redis } from 'ioredis';
 import { BcryptEncryption } from 'src/infrastructure/lib/bcrypt/bcrypt';
+import { GroupMembersService } from '../group-members/group-members.service';
+import { PaymentStudentService } from '../payment-for-student/payment-student.service';
 
 @Injectable()
 export class StudentService {
   constructor(
     private readonly prismaService: PrismaService,
+    private readonly groupMembersService: GroupMembersService,
+    private readonly paymentStudentService: PaymentStudentService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
   ) {}
 
@@ -33,16 +36,33 @@ export class StudentService {
       createStudentDto.password,
     );
 
+    const studentDto = {
+      full_name: createStudentDto.full_name,
+      username: createStudentDto.username,
+      password: createStudentDto.password,
+      address: createStudentDto.address,
+      phone_number: createStudentDto.phone_number,
+      gender: createStudentDto.gender,
+      data_of_birth: createStudentDto.data_of_birth,
+    };
     const student = await this.prismaService.user.create({
-      data: { ...createStudentDto, role: 'STUDENT' },
+      data: { ...studentDto, role: 'STUDENT' },
     });
 
-    // Redisni tozalash (pagination keshlarini)
     const keys = await this.redis.keys('students:page:*');
     if (keys.length) {
       await this.redis.del(...keys);
     }
-
+    const group = await this.groupMembersService.create({
+      groupId: createStudentDto.groupId,
+      userId: student.user_id,
+    });
+    await this.paymentStudentService.createPayment({
+      type: createStudentDto.paymentType,
+      sum: createStudentDto.sum,
+      student_id: student.user_id,
+      group_id: group.data.group_id,
+    });
     return {
       status: HttpStatus.CREATED,
       message: 'created',
@@ -54,7 +74,6 @@ export class StudentService {
     const redisKey = `students:page:${page}:limit:${limit}`;
     const cachedStudents = await this.redis.get(redisKey);
     if (cachedStudents) {
-      
       return JSON.parse(cachedStudents);
     }
 

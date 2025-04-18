@@ -13,6 +13,8 @@ model User {
   username          String              @unique
   password          String
   role              UserRole
+  address           String
+  phone_number      String
   gender            Gender
   data_of_birth     DateTime
   created_at        DateTime            @default(now())
