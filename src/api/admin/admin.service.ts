@@ -174,7 +174,8 @@ export class AdminService {
     }
   }
 
-  async cleanUpUntrackedImages() {
+  //! Clean UpUntrackedImagesAdmin
+  async cleanUpUntrackedImagesAdmin() {
     const adminImages = await this.prismaService.images.findMany({
       where: { user: { role: 'ADMIN' } },
     });

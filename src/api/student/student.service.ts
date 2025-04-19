@@ -13,6 +13,8 @@ import { Redis } from 'ioredis';
 import { BcryptEncryption } from 'src/infrastructure/lib/bcrypt/bcrypt';
 import { GroupMembersService } from '../group-members/group-members.service';
 import { PaymentStudentService } from '../payment-for-student/payment-student.service';
+import { config } from 'src/config';
+import { FileService } from 'src/infrastructure/lib';
 
 @Injectable()
 export class StudentService {
@@ -21,6 +23,7 @@ export class StudentService {
     private readonly groupMembersService: GroupMembersService,
     private readonly paymentStudentService: PaymentStudentService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
+    private readonly fileService: FileService,
   ) {}
 
   async create(createStudentDto: CreateStudentDto) {
@@ -99,6 +102,61 @@ export class StudentService {
       data: students,
     };
   }
+
+    async imageUpload(file: Express.Multer.File) {
+      if (!file) {
+        throw new NotFoundException('file are required!');
+      }
+      try {
+        const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/gif'];
+        if (!allowedMimeTypes.includes(file.mimetype)) {
+          throw new BadRequestException(
+            'Only JPG, PNG and GIF files are allowed',
+          );
+        }
+        const uploadFile = await this.fileService.uploadFile(file, 'student');
+  
+        if (!uploadFile || !uploadFile.path) {
+          throw new BadRequestException('Failed to upload image');
+        }
+  
+        const imageUrl = config.API_URL + '/' + uploadFile.path;
+  
+        return {
+          status: HttpStatus.OK,
+          message: 'success',
+          data: {
+            image_url: imageUrl,
+          },
+        };
+      } catch (error) {
+        throw new BadRequestException(
+          `Failed to uploading image: ${error.message}`,
+        );
+      }
+    }
+  
+
+    async cleanUpUntrackedImagesStudent() {
+      const studentImages = await this.prismaService.images.findMany({
+        where: { user: { role: 'STUDENT' } },
+      });
+  
+      const studentImagesUrlArr = studentImages.map((item) =>
+        item.url.replace(config.API_URL + '/', ''),
+      );
+      const studentAllFile = await this.fileService.getAllFiles('student');
+  
+      for (const filePath of studentAllFile) {
+        if (!studentImagesUrlArr.includes(filePath)) {
+          await this.fileService.deleteFile(filePath);
+        }
+      }
+      return {
+        status: HttpStatus.OK,
+        message: 'success',
+      };
+    }
 
   async getProfile(id: string) {
     const student = await this.prismaService.user.findUnique({

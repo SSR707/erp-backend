@@ -306,8 +306,8 @@ export class AdminController {
   @UseGuards(AdminGuard)
   @ApiBearerAuth()
   @Delete('cleanUpUntrackedImages')
-  cleanUpUntrackedImages() {
-    return this.adminService.cleanUpUntrackedImages();
+  cleanUpUntrackedImagesAdmin() {
+    return this.adminService.cleanUpUntrackedImagesAdmin();
   }
 
   @ApiOperation({
