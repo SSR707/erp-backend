@@ -56,7 +56,6 @@ export class RegisterDto {
     example: '+998995556656',
   })
   @IsPhoneNumber()
-  @IsOptional()
   phone_number: string;
 
   

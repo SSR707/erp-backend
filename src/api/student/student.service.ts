@@ -82,6 +82,15 @@ export class StudentService {
       where: { role: 'STUDENT' },
       skip,
       take: limit,
+      include: {
+        group_members: {
+          include: { group: { select: { name: true, group_id: true } } },
+        },
+      },
+    });
+
+    const studentCount = await this.prismaService.user.count({
+      where: { role: 'STUDENT' },
     });
 
     await this.redis.set(
@@ -90,6 +99,9 @@ export class StudentService {
         status: HttpStatus.OK,
         message: 'success',
         data: students,
+        meta: {
+          studentCount,
+        },
       }),
     );
 
@@ -97,6 +109,9 @@ export class StudentService {
       status: HttpStatus.OK,
       message: 'success',
       data: students,
+      meta: {
+        studentCount,
+      },
     };
   }
 
