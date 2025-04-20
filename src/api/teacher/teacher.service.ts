@@ -4,12 +4,15 @@ import {
   HttpStatus,
   ConflictException,
   Inject,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { BcryptEncryption } from 'src/infrastructure/lib/bcrypt/bcrypt';
 import { Redis } from 'ioredis';
+import { config } from 'src/config';
+import { FileService } from 'src/infrastructure/lib';
 
 @Injectable()
 export class TeacherService {
@@ -17,6 +20,7 @@ export class TeacherService {
   constructor(
     private readonly prismaService: PrismaService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
+    private readonly fileService: FileService,
   ) {}
 
   async create(createTeacherDto: CreateTeacherDto) {
@@ -82,6 +86,62 @@ export class TeacherService {
       data: teacher,
     };
   }
+
+  async imageUpload(file: Express.Multer.File) {
+    if (!file) {
+      throw new NotFoundException('file are required!');
+    }
+    try {
+      const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/gif'];
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        throw new BadRequestException(
+          'Only JPG, PNG and GIF files are allowed',
+        );
+      }
+      const uploadFile = await this.fileService.uploadFile(file, 'teacher');
+
+      if (!uploadFile || !uploadFile.path) {
+        throw new BadRequestException('Failed to upload image');
+      }
+
+      const imageUrl = config.API_URL + '/' + uploadFile.path;
+
+      return {
+        status: HttpStatus.OK,
+        message: 'success',
+        data: {
+          image_url: imageUrl,
+        },
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to uploading image: ${error.message}`,
+      );
+    }
+  }
+
+
+  async cleanUpUntrackedImagesTeacehr() {
+    const teacherImages = await this.prismaService.images.findMany({
+      where: { user: { role: 'TEACHER' } },
+    });
+
+    const teacherImagesUrlArr = teacherImages.map((item) =>
+      item.url.replace(config.API_URL + '/', ''),
+    );
+    const teacherAllFile = await this.fileService.getAllFiles('teacher');
+
+    for (const filePath of teacherAllFile) {
+      if (!teacherImagesUrlArr.includes(filePath)) {
+        await this.fileService.deleteFile(filePath);
+      }
+    }
+    return {
+      status: HttpStatus.OK,
+      message: 'success',
+    };
+  }
+
 
   async findOne(id: string) {
     const teacher = await this.prismaService.user.findUnique({
