@@ -15,6 +15,15 @@ import { PaymentEnum, UserGender } from 'src/common/enum';
 export class CreateStudentDto {
   @ApiProperty({
     type: String,
+    description: 'Image of student',
+    example: '.jpg',
+  })
+  @IsString()
+  @IsOptional()
+  img_url: string;
+
+  @ApiProperty({
+    type: String,
     description: 'FullName of student',
     example: 'Jhon Doe',
   })
