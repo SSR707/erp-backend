@@ -51,7 +51,13 @@ export class StudentService {
     const student = await this.prismaService.user.create({
       data: { ...studentDto, role: 'STUDENT' },
     });
-
+    await this.prismaService.images.create({
+      data: {
+        url: createStudentDto.img_url,
+        is_worked: true,
+        user_id: student.user_id,
+      },
+    });
     const keys = await this.redis.keys('students:page:*');
     if (keys.length) {
       await this.redis.del(...keys);
@@ -89,6 +95,11 @@ export class StudentService {
         group_members: {
           include: { group: { select: { name: true, group_id: true } } },
         },
+        images: {
+          select: {
+            url: true,
+          },
+        },
       },
     });
 
@@ -118,60 +129,59 @@ export class StudentService {
     };
   }
 
-    async imageUpload(file: Express.Multer.File) {
-      if (!file) {
-        throw new NotFoundException('file are required!');
-      }
-      try {
-        const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/gif'];
-        if (!allowedMimeTypes.includes(file.mimetype)) {
-          throw new BadRequestException(
-            'Only JPG, PNG and GIF files are allowed',
-          );
-        }
-        const uploadFile = await this.fileService.uploadFile(file, 'student');
-  
-        if (!uploadFile || !uploadFile.path) {
-          throw new BadRequestException('Failed to upload image');
-        }
-  
-        const imageUrl = config.API_URL + '/' + uploadFile.path;
-  
-        return {
-          status: HttpStatus.OK,
-          message: 'success',
-          data: {
-            image_url: imageUrl,
-          },
-        };
-      } catch (error) {
+  async imageUpload(file: Express.Multer.File) {
+    if (!file) {
+      throw new NotFoundException('file are required!');
+    }
+    try {
+      const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/gif'];
+      if (!allowedMimeTypes.includes(file.mimetype)) {
         throw new BadRequestException(
-          `Failed to uploading image: ${error.message}`,
+          'Only JPG, PNG and GIF files are allowed',
         );
       }
-    }
-  
+      const uploadFile = await this.fileService.uploadFile(file, 'student');
 
-    async cleanUpUntrackedImagesStudent() {
-      const studentImages = await this.prismaService.images.findMany({
-        where: { user: { role: 'STUDENT' } },
-      });
-  
-      const studentImagesUrlArr = studentImages.map((item) =>
-        item.url.replace(config.API_URL + '/', ''),
-      );
-      const studentAllFile = await this.fileService.getAllFiles('student');
-  
-      for (const filePath of studentAllFile) {
-        if (!studentImagesUrlArr.includes(filePath)) {
-          await this.fileService.deleteFile(filePath);
-        }
+      if (!uploadFile || !uploadFile.path) {
+        throw new BadRequestException('Failed to upload image');
       }
+
+      const imageUrl = config.API_URL + '/' + uploadFile.path;
+
       return {
         status: HttpStatus.OK,
         message: 'success',
+        data: {
+          image_url: imageUrl,
+        },
       };
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to uploading image: ${error.message}`,
+      );
     }
+  }
+
+  async cleanUpUntrackedImagesStudent() {
+    const studentImages = await this.prismaService.images.findMany({
+      where: { user: { role: 'STUDENT' } },
+    });
+
+    const studentImagesUrlArr = studentImages.map((item) =>
+      item.url.replace(config.API_URL + '/', ''),
+    );
+    const studentAllFile = await this.fileService.getAllFiles('student');
+
+    for (const filePath of studentAllFile) {
+      if (!studentImagesUrlArr.includes(filePath)) {
+        await this.fileService.deleteFile(filePath);
+      }
+    }
+    return {
+      status: HttpStatus.OK,
+      message: 'success',
+    };
+  }
 
   async getProfile(id: string) {
     const student = await this.prismaService.user.findUnique({
