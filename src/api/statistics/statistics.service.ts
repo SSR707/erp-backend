@@ -5,13 +5,25 @@ import { PrismaService } from 'src/common/prisma/prisma.service';
 @Injectable()
 export class StatisticsService {
   constructor(private readonly prismaService: PrismaService) {}
-  async getDashboard() {
-    const teacherCount = await this.prismaService.user.count({
-      where: { role: UserRole.TEACHER },
+  async getDashboard(fullname: string, category: string) {
+    const userCount = await this.prismaService.user.count({
+      where: {
+        role: category ? (category as UserRole) : undefined,
+        full_name: fullname
+          ? { contains: fullname, mode: 'insensitive' }
+          : undefined,
+      },
     });
-    const teachers = await this.prismaService.user.findMany({
-      where: { role: UserRole.TEACHER },
-      take: 3,
+    const users = await this.prismaService.user.findMany({
+      where: {
+        role: category ? (category as UserRole) : undefined,
+        full_name: fullname
+          ? { contains: fullname, mode: 'insensitive' }
+          : undefined,
+      },
+      include: {
+        images: true,
+      },
     });
 
     const lastMonth = new Date();
@@ -217,8 +229,8 @@ export class StatisticsService {
       status: HttpStatus.OK,
       message: 'success',
       data: {
-        teacherCount,
-        teachers,
+        userCount,
+        users,
         income: {
           sum: totalCurrentMonthIncome,
           percent: percentageChange,
