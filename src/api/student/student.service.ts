@@ -100,6 +100,7 @@ export class StudentService {
             url: true,
           },
         },
+        PaymentForStudent: true
       },
     });
 

@@ -65,6 +65,9 @@ export class TeacherService {
     const skip = (page - 1) * limit;
     const teachers = await this.prismaService.user.findMany({
       where: { role: 'TEACHER' },
+      include: {
+        images: true,
+      },
       take: limit,
       skip: skip,
     });
