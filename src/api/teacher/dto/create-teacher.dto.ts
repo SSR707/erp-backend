@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, IsStrongPassword } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  IsStrongPassword,
+} from 'class-validator';
 import { UserGender } from 'src/common/enum';
 
 export class CreateTeacherDto {
@@ -23,6 +31,14 @@ export class CreateTeacherDto {
 
   @ApiProperty({
     type: String,
+    description: 'image of student',
+    example: 'image.png',
+  })
+  @IsString()
+  img_url: string;
+
+  @ApiProperty({
+    type: String,
     description: 'Password of student',
     example: 'jhondoe007!A',
   })
@@ -38,7 +54,6 @@ export class CreateTeacherDto {
   @IsPhoneNumber()
   phone_number: string;
 
-  
   @ApiProperty({
     type: String,
     description: 'Address of teacher',
@@ -47,9 +62,6 @@ export class CreateTeacherDto {
   @IsString()
   @IsNotEmpty()
   address: string;
-
-
-
 
   @ApiProperty({
     type: String,
@@ -66,5 +78,5 @@ export class CreateTeacherDto {
     example: '2005-05-15',
   })
   @IsDateString()
-  data_of_birth: string| Date;
+  data_of_birth: string | Date;
 }

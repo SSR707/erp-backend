@@ -13,10 +13,10 @@ import { BcryptEncryption } from 'src/infrastructure/lib/bcrypt/bcrypt';
 import { Redis } from 'ioredis';
 import { config } from 'src/config';
 import { FileService } from 'src/infrastructure/lib';
+import { UserGender, UserRole } from 'src/common/enum';
 
 @Injectable()
 export class TeacherService {
-
   constructor(
     private readonly prismaService: PrismaService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
@@ -34,8 +34,14 @@ export class TeacherService {
     createTeacherDto.password = await BcryptEncryption.encrypt(
       createTeacherDto.password,
     );
+    const { img_url, ...newTeacherDto } = createTeacherDto;
+
     const teacher = await this.prismaService.user.create({
-      data: { ...createTeacherDto, role: 'TEACHER' },
+      data: { ...newTeacherDto, role: 'TEACHER' },
+    });
+
+    await this.prismaService.images.create({
+      data: { is_worked: true, url: img_url, user_id: teacher.user_id },
     });
 
     // teacher delete from redis
@@ -58,9 +64,8 @@ export class TeacherService {
       return {
         status: HttpStatus.OK,
         message: 'success',
-        data:JSON.parse(allTeacher)
+        data: JSON.parse(allTeacher),
       };
-
     }
     const skip = (page - 1) * limit;
     const teachers = await this.prismaService.user.findMany({
@@ -71,11 +76,27 @@ export class TeacherService {
       take: limit,
       skip: skip,
     });
-    await this.redis.set(key, JSON.stringify(teachers));
+    const teacherCount = await this.prismaService.user.count({
+      where: { role: UserRole.TEACHER },
+    });
+    await this.redis.set(
+      key,
+      JSON.stringify({
+        status: HttpStatus.OK,
+        message: 'success',
+        data: teachers,
+        meta: {
+          teacherCount,
+        },
+      }),
+    );
     return {
       status: HttpStatus.OK,
       message: 'success',
       data: teachers,
+      meta: {
+        teacherCount,
+      },
     };
   }
   async getProfile(id: string) {
@@ -123,7 +144,6 @@ export class TeacherService {
     }
   }
 
-
   async cleanUpUntrackedImagesTeacehr() {
     const teacherImages = await this.prismaService.images.findMany({
       where: { user: { role: 'TEACHER' } },
@@ -144,7 +164,6 @@ export class TeacherService {
       message: 'success',
     };
   }
-
 
   async findOne(id: string) {
     const teacher = await this.prismaService.user.findUnique({
@@ -200,5 +219,4 @@ export class TeacherService {
       message: 'success',
     };
   }
-
 }
