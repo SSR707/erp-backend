@@ -40,7 +40,7 @@ export class TeacherService {
       data: { ...newTeacherDto, role: 'TEACHER' },
     });
 
-    if(createTeacherDto.img_url){
+    if (createTeacherDto.img_url) {
       await this.prismaService.images.create({
         data: { is_worked: true, url: img_url, user_id: teacher.user_id },
       });
@@ -59,15 +59,43 @@ export class TeacherService {
     };
   }
 
-  async findAll(page: number, limit: number) {
-    const key = `teachers:page:${page}:limit:${limit}`;
+  async forGroup() {
+    const teachers = await this.prismaService.user.findMany({
+      where: { role: UserRole.TEACHER },
+      include: { images: true },
+    });
+    return {
+      status: HttpStatus.OK,
+      message: 'success',
+      data: teachers,
+    };
+  }
+
+  async findAll(
+    page: number,
+    limit: number,
+    date_of_birth?: string,
+    gender?: UserGender,
+    full_name?: string,
+  ) {
+    const key = `teachers:page:${page}:limit:${limit}:full_name${full_name}`;
     const allTeacher = await this.redis.get(key);
     if (allTeacher) {
       return JSON.parse(allTeacher);
     }
     const skip = (page - 1) * limit;
     const teachers = await this.prismaService.user.findMany({
-      where: { role: 'TEACHER' },
+      where: {
+        role: UserRole.TEACHER,
+        ...(gender && { gender }),
+        ...(date_of_birth && { date_of_birth: { equals: date_of_birth } }),
+        ...(full_name && {
+          full_name: {
+            contains: full_name,
+            mode: 'insensitive',
+          },
+        }),
+      },
       include: {
         images: true,
       },
@@ -75,7 +103,17 @@ export class TeacherService {
       skip: skip,
     });
     const teacherCount = await this.prismaService.user.count({
-      where: { role: UserRole.TEACHER },
+      where: {
+        role: UserRole.TEACHER,
+        ...(gender && { gender }),
+        ...(date_of_birth && { date_of_birth: { equals: date_of_birth } }),
+        ...(full_name && {
+          full_name: {
+            contains: full_name,
+            mode: 'insensitive',
+          },
+        }),
+      },
     });
     await this.redis.set(
       key,
@@ -166,6 +204,7 @@ export class TeacherService {
   async findOne(id: string) {
     const teacher = await this.prismaService.user.findUnique({
       where: { user_id: id, role: 'TEACHER' },
+      include: { images: true },
     });
     if (!teacher) {
       throw new NotFoundException(`Teacher with id ${id} not found.`);

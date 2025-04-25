@@ -23,6 +23,7 @@ import {
   ApiConsumes,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -31,6 +32,7 @@ import { TeacherGuard } from 'src/common/guard/teacher.guard';
 import { AdminGuard } from 'src/common/guard/admin.guard';
 import { UserID } from 'src/common/decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UserGender } from 'src/common/enum';
 
 @ApiTags('Teacher Api')
 @ApiBearerAuth()
@@ -92,15 +94,52 @@ export class TeacherController {
       },
     },
   })
+  @ApiQuery({
+    name: 'page',
+    type: Number,
+    required: false,
+    description: 'Sahifa raqami, default: 1',
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: false,
+    description: 'Har bir sahifadagi elementlar soni, default: 10',
+  })
+  @ApiQuery({
+    name: 'date_of_birth',
+    type: String,
+    required: false,
+    description: 'Tug‘ilgan sana (masalan: 2000-01-01)',
+  })
+  @ApiQuery({
+    name: 'gender',
+    enum: UserGender,
+    required: false,
+    description: 'Foydalanuvchi jinsi (masalan: MALE yoki FEMALE)',
+  })
+  @ApiQuery({
+    name: 'full_name',
+    type: String,
+    required: false,
+    description: 'Foydalanuvchi ismi (masalan: Shomurod)',
+  })
   @UseGuards(AdminGuard)
   @Get()
   findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
+    @Query('date_of_birth') date_of_birth?: string,
+    @Query('gender') gender?: UserGender,
+    @Query('full_name') full_name?: string,
   ) {
-    return this.teacherService.findAll(page, limit);
+    return this.teacherService.findAll(page, limit, date_of_birth, gender, full_name);
   }
 
+  @Get('for-group')
+  findAllForGroup() {
+    return this.teacherService.forGroup();
+  }
 
   @ApiOperation({
     summary: 'Upload student image',
@@ -147,7 +186,7 @@ export class TeacherController {
   @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file'))
   @Post('upload-image')
-  uploadImga(@UploadedFile() file: Express.Multer.File) {
+  uploadImg(@UploadedFile() file: Express.Multer.File) {
     return this.teacherService.imageUpload(file);
   }
 
