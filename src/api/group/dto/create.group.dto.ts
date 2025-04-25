@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MaxLength, MinLength, IsNotEmpty, Matches, IsUUID } from 'class-validator';
+import {
+  IsString,
+  MaxLength,
+  MinLength,
+  IsNotEmpty,
+  Matches,
+  IsUUID,
+  IsDateString,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateGroupDto {
   @ApiProperty({
@@ -37,7 +46,7 @@ export class CreateGroupDto {
     example: 'ACTIVE',
   })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @Matches(/^(ACTIVE|INACTIVE|COMPLETED)$/)
   status: string;
 
@@ -49,4 +58,12 @@ export class CreateGroupDto {
   @IsNotEmpty()
   @IsUUID()
   course_id: string;
+
+  @ApiProperty({
+    type: String,
+    description: 'Start date of group',
+    example: '2005-05-15',
+  })
+  @IsDateString()
+  start_date: string | Date;
 }

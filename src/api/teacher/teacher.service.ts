@@ -40,9 +40,11 @@ export class TeacherService {
       data: { ...newTeacherDto, role: 'TEACHER' },
     });
 
-    await this.prismaService.images.create({
-      data: { is_worked: true, url: img_url, user_id: teacher.user_id },
-    });
+    if(createTeacherDto.img_url){
+      await this.prismaService.images.create({
+        data: { is_worked: true, url: img_url, user_id: teacher.user_id },
+      });
+    }
 
     // teacher delete from redis
     const keys = await this.redis.keys('teachers:page:*');
@@ -61,11 +63,7 @@ export class TeacherService {
     const key = `teachers:page:${page}:limit:${limit}`;
     const allTeacher = await this.redis.get(key);
     if (allTeacher) {
-      return {
-        status: HttpStatus.OK,
-        message: 'success',
-        data: JSON.parse(allTeacher),
-      };
+      return JSON.parse(allTeacher);
     }
     const skip = (page - 1) * limit;
     const teachers = await this.prismaService.user.findMany({
