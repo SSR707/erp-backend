@@ -35,6 +35,7 @@ export class CreateTeacherDto {
     example: 'image.png',
   })
   @IsString()
+  @IsOptional()
   img_url: string;
 
   @ApiProperty({

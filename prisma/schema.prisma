@@ -33,6 +33,7 @@ model Groups {
   group_id    String      @id @default(uuid())
   name        String      @unique
   description String
+  start_date  DateTime 
   course_id   String
   teacher_id  String
   status      GroupStatus @default(ACTIVE)

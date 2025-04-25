@@ -26,6 +26,7 @@ export class GroupService {
     return {
       name: createGroupDto.name,
       description: createGroupDto.description,
+      start_date: new Date(createGroupDto.start_date),
       status: createGroupDto.status as GroupStatus,
       course: {
         connect: {
