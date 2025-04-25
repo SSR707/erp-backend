@@ -15,6 +15,7 @@ import { GroupMembersService } from '../group-members/group-members.service';
 import { PaymentStudentService } from '../payment-for-student/payment-student.service';
 import { config } from 'src/config';
 import { FileService } from 'src/infrastructure/lib';
+import { UserGender } from 'src/common/enum';
 
 @Injectable()
 export class StudentService {
@@ -59,8 +60,12 @@ export class StudentService {
       },
     });
     const keys = await this.redis.keys('students:page:*');
+    const keysAll = await this.redis.keys('students:all');
     if (keys.length) {
       await this.redis.del(...keys);
+    }
+    if (keysAll.length) {
+      await this.redis.del(...keysAll);
     }
     const group = await this.groupMembersService.create({
       groupId: createStudentDto.groupId,
@@ -79,8 +84,15 @@ export class StudentService {
     };
   }
 
-  async findAll(page: number, limit: number) {
-    const redisKey = `students:page:${page}:limit:${limit}`;
+  async findAll(
+    page: number,
+    limit: number,
+    gender: string,
+    data_of_birth: string,
+    groupId: string,
+    fullname: string,
+  ) {
+    const redisKey = `students:page:${page}:limit:${limit}:gender:${gender}:data_of_birth:${data_of_birth}:groupId:${groupId}:fullname:${fullname}`;
     const cachedStudents = await this.redis.get(redisKey);
     if (cachedStudents) {
       return JSON.parse(cachedStudents);
@@ -88,7 +100,28 @@ export class StudentService {
 
     const skip = (page - 1) * limit;
     const students = await this.prismaService.user.findMany({
-      where: { role: 'STUDENT' },
+      where: {
+        role: 'STUDENT',
+        ...(groupId && {
+          group_members: {
+            some: {
+              group_id: groupId,
+            },
+          },
+        }),
+        ...(data_of_birth && {
+          data_of_birth: new Date(data_of_birth),
+        }),
+        ...(gender && {
+          gender: gender as UserGender,
+        }),
+        ...(fullname && {
+          full_name: {
+            contains: fullname,
+            mode: 'insensitive',
+          },
+        }),
+      },
       skip,
       take: limit,
       include: {
@@ -100,12 +133,33 @@ export class StudentService {
             url: true,
           },
         },
-        PaymentForStudent: true
+        PaymentForStudent: true,
       },
     });
 
     const studentCount = await this.prismaService.user.count({
-      where: { role: 'STUDENT' },
+      where: {
+        role: 'STUDENT',
+        ...(groupId && {
+          group_members: {
+            some: {
+              group_id: groupId,
+            },
+          },
+        }),
+        ...(data_of_birth && {
+          data_of_birth: new Date(data_of_birth),
+        }),
+        ...(gender && {
+          gender: gender as UserGender,
+        }),
+        ...(fullname && {
+          full_name: {
+            contains: fullname,
+            mode: 'insensitive',
+          },
+        }),
+      },
     });
 
     await this.redis.set(
@@ -127,6 +181,41 @@ export class StudentService {
       meta: {
         studentCount,
       },
+    };
+  }
+
+  async getAllStudent() {
+    const redisKey = `students:all`;
+    const cachedStudents = await this.redis.get(redisKey);
+    if (cachedStudents) {
+      return JSON.parse(cachedStudents);
+    }
+    const students = await this.prismaService.user.findMany({
+      where: { role: 'STUDENT' },
+      include: {
+        group_members: {
+          include: { group: { select: { name: true, group_id: true } } },
+        },
+        images: {
+          select: {
+            url: true,
+          },
+        },
+        PaymentForStudent: true,
+      },
+    });
+    await this.redis.set(
+      redisKey,
+      JSON.stringify({
+        status: HttpStatus.OK,
+        message: 'success',
+        data: students,
+      }),
+    );
+    return {
+      status: HttpStatus.OK,
+      message: 'success',
+      data: students,
     };
   }
 
@@ -225,8 +314,12 @@ export class StudentService {
 
     // Redisni tozalash
     const keys = await this.redis.keys('students:page:*');
+    const keysAll = await this.redis.keys('students:all');
     if (keys.length) {
       await this.redis.del(...keys);
+    }
+    if (keysAll.length) {
+      await this.redis.del(...keysAll);
     }
 
     return {
@@ -247,10 +340,13 @@ export class StudentService {
 
     // Redisni tozalash
     const keys = await this.redis.keys('students:page:*');
+    const keysAll = await this.redis.keys('students:all');
     if (keys.length) {
       await this.redis.del(...keys);
     }
-
+    if (keysAll.length) {
+      await this.redis.del(...keysAll);
+    }
     return {
       status: HttpStatus.OK,
       message: 'success',
