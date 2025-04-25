@@ -69,6 +69,10 @@ export class StudentController {
   @ApiOperation({ summary: 'Get all students' })
   @ApiQuery({ name: 'page', required: true, type: Number })
   @ApiQuery({ name: 'limit', required: true, type: Number })
+  @ApiQuery({ name: 'gender', required: false, type: String })
+  @ApiQuery({ name: 'data_of_birth', required: false, type: String })
+  @ApiQuery({ name: 'groupId', required: false, type: String })
+  @ApiQuery({ name: 'fullname', required: false, type: String })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Students retrieved successfully',
@@ -97,8 +101,51 @@ export class StudentController {
   findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('gender') gender: string,
+    @Query('data_of_birth') data_of_birth: string,
+    @Query('groupId') groupId: string,
+    @Query('fullname') fullname: string,
   ) {
-    return this.studentService.findAll(page, limit);
+    return this.studentService.findAll(
+      page,
+      limit,
+      gender,
+      data_of_birth,
+      groupId,
+      fullname,
+    );
+  }
+
+  @Get('all')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Get all students' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Students retrieved successfully',
+    schema: {
+      example: {
+        status: HttpStatus.OK,
+        message: 'success',
+        data: [
+          {
+            user_id: 'f6bb055d-8b0b-4503-b53b-67c1230993f7',
+            full_name: 'Jhon Doe',
+            username: 'jhondoe007',
+            password: '$2b$10$examplepasswordhash',
+            role: 'STUDENT',
+            created_at: '2025-04-06T15:25:06.746Z',
+            updated_at: '2025-04-06T15:25:06.746Z',
+          },
+        ],
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'No students found',
+  })
+  findAllStudents() {
+    return this.studentService.getAllStudent();
   }
 
   @Get('profile')
