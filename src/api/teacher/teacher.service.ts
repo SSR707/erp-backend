@@ -78,17 +78,20 @@ export class TeacherService {
     gender?: UserGender,
     full_name?: string,
   ) {
-    const key = `teachers:page:${page}:limit:${limit}:full_name${full_name}`;
+    const key = `teachers:page:${page}:limit:${limit}:full_name${full_name}:gender:${gender}:date_of_birth:${date_of_birth}`;
     const allTeacher = await this.redis.get(key);
     if (allTeacher) {
       return JSON.parse(allTeacher);
     }
     const skip = (page - 1) * limit;
+    const dateFormat = new Date(date_of_birth);
     const teachers = await this.prismaService.user.findMany({
       where: {
         role: UserRole.TEACHER,
         ...(gender && { gender }),
-        ...(date_of_birth && { date_of_birth: { equals: date_of_birth } }),
+        ...(date_of_birth && {
+          data_of_birth: { equals: dateFormat }, // <-- corrected here
+        }),
         ...(full_name && {
           full_name: {
             contains: full_name,
@@ -106,7 +109,9 @@ export class TeacherService {
       where: {
         role: UserRole.TEACHER,
         ...(gender && { gender }),
-        ...(date_of_birth && { date_of_birth: { equals: date_of_birth } }),
+        ...(date_of_birth && {
+          data_of_birth: { equals: dateFormat }, // <-- corrected here
+        }),
         ...(full_name && {
           full_name: {
             contains: full_name,
@@ -135,6 +140,7 @@ export class TeacherService {
       },
     };
   }
+
   async getProfile(id: string) {
     const teacher = await this.prismaService.user.findUnique({
       where: { user_id: id, role: 'TEACHER' },

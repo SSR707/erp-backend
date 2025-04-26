@@ -100,8 +100,13 @@ export class GroupService {
     };
   }
 
-  async findAllGroup(page: number, limit: number) {
-    const redisKey = `groups:page:${page}:limit:${limit}`;
+  async findAllGroup(
+    page: number,
+    limit: number,
+    startDate: string,
+    status: GroupStatus,
+  ) {
+    const redisKey = `groups:page:${page}:limit:${limit}:startDate${startDate}:status:${status}`;
     const cachedGroup = await this.redis.get(redisKey);
 
     if (cachedGroup) {
@@ -110,7 +115,7 @@ export class GroupService {
 
     const skip = (page - 1) * limit;
 
-    // 🟡 Guruhlar ro'yxati
+    // 🟡 Guruhlar ro'yxati, startDate, status
     const allGroups = await this.prismaService.groups.findMany({
       skip,
       take: limit,
@@ -118,6 +123,14 @@ export class GroupService {
         course: true,
         teacher: true,
         group_members: { include: { user: true } },
+      },
+      where: {
+        ...(startDate && {
+          start_date: {
+            equals: startDate,
+          },
+        }),
+        ...(status && { status }),
       },
     });
 

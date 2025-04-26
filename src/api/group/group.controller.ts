@@ -21,6 +21,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UpdateGroupDto } from './dto/update.group.dto';
+import { GroupStatus } from '@prisma/client';
 
 @ApiTags('Groups') // Group API documentation tag
 @ApiBearerAuth()
@@ -43,18 +44,18 @@ export class GroupController {
           description: 'Advanced programming group',
           course_id: 'course-uuid-example',
           created_at: '2025-04-10T05:42:33.401Z',
-          updated_at: '2025-04-10T05:42:33.401Z'
-        }
-      }
-    }
+          updated_at: '2025-04-10T05:42:33.401Z',
+        },
+      },
+    },
   })
   @ApiResponse({
     status: HttpStatus.CONFLICT,
-    description: 'Group with this name already exists'
+    description: 'Group with this name already exists',
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid input data'
+    description: 'Invalid input data',
   })
   async createGroup(@Body() createGroupDto: CreateGroupDto) {
     return this.groupService.createGroup(createGroupDto);
@@ -71,17 +72,17 @@ export class GroupController {
     status: HttpStatus.NOT_FOUND,
     description: 'No groups found for this admin',
   })
-
-
-
-  @ApiQuery({ name: 'page', required: true, type: 'number' })
-  @ApiQuery({ name: 'limit', required: true, type: 'number' })
+  @ApiQuery({ name: 'page', required: false, type: 'number' })
+  @ApiQuery({ name: 'limit', required: false, type: 'number' })
+  @ApiQuery({ name: 'start_date', required: false, type: 'string' })
+  @ApiQuery({ name: 'status', required: false, type: 'string' })
   getAllGroups(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('start_date') startDate: string,
+    @Query('status') status: GroupStatus,
   ) {
-    return this.groupService.findAllGroup(page, limit);
-
+    return this.groupService.findAllGroup(page, limit, startDate, status);
   }
 
   @Get(':id')
