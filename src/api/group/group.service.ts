@@ -128,7 +128,7 @@ export class GroupService {
       where: {
         ...(startDate && {
           start_date: {
-            equals: startDate,
+            equals: new Date(startDate),
           },
         }),
         ...(status && { status }),
