@@ -210,7 +210,7 @@ export class TeacherService {
   async findOne(id: string) {
     const teacher = await this.prismaService.user.findUnique({
       where: { user_id: id, role: 'TEACHER' },
-      include: { images: true },
+      include: { images: true, groups: true, PaymentForTeacher: true },
     });
     if (!teacher) {
       throw new NotFoundException(`Teacher with id ${id} not found.`);
