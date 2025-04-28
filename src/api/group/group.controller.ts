@@ -81,8 +81,9 @@ export class GroupController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     @Query('start_date') startDate: string,
     @Query('status') status: GroupStatus,
+    @Query('name') name: string,
   ) {
-    return this.groupService.findAllGroup(page, limit, startDate, status);
+    return this.groupService.findAllGroup(page, limit, startDate, status, name);
   }
 
   @Get(':id')

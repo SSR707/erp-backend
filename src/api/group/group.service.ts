@@ -105,8 +105,9 @@ export class GroupService {
     limit: number,
     startDate: string,
     status: GroupStatus,
+    name: string,
   ) {
-    const redisKey = `groups:page:${page}:limit:${limit}:startDate${startDate}:status:${status}`;
+    const redisKey = `groups:page:${page}:limit:${limit}:startDate${startDate}:status:${status}:name:${name}`;
     const cachedGroup = await this.redis.get(redisKey);
 
     if (cachedGroup) {
@@ -131,6 +132,7 @@ export class GroupService {
           },
         }),
         ...(status && { status }),
+        ...(name && { name }),
       },
     });
 
