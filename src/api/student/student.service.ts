@@ -67,16 +67,18 @@ export class StudentService {
     if (keysAll.length) {
       await this.redis.del(...keysAll);
     }
-    const group = await this.groupMembersService.create({
-      groupId: createStudentDto.groupId,
-      userId: student.user_id,
-    });
-    await this.paymentStudentService.createPayment({
-      type: createStudentDto.paymentType,
-      sum: createStudentDto.sum,
-      student_id: student.user_id,
-      group_id: group.data.group_id,
-    });
+    if (createStudentDto.groupId) {
+      const group = await this.groupMembersService.create({
+        groupId: createStudentDto.groupId,
+        userId: student.user_id,
+      });
+      await this.paymentStudentService.createPayment({
+        type: createStudentDto.paymentType,
+        sum: createStudentDto.sum,
+        student_id: student.user_id,
+        group_id: group.data.group_id,
+      });
+    }
     return {
       status: HttpStatus.CREATED,
       message: 'created',

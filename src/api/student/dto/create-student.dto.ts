@@ -73,18 +73,20 @@ export class CreateStudentDto {
     type: String,
   })
   @IsString()
+  @IsOptional()
   groupId: string;
 
   @ApiProperty({ enum: PaymentEnum, description: 'Type of the payment' })
+  @IsOptional()
   @IsEnum(PaymentEnum, {
     message: 'type must be a valid PaymentType enum value (CASH, CREDIT_CARD)',
   })
   paymentType: PaymentEnum;
 
   @ApiProperty({ type: Number, description: 'Debt sum', example: 1000 })
-  @IsNotEmpty()
   @IsNumber()
   @IsPositive()
+  @IsOptional()
   sum: number;
 
   @ApiProperty({
