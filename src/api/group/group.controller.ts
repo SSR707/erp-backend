@@ -76,6 +76,7 @@ export class GroupController {
   @ApiQuery({ name: 'limit', required: false, type: 'number' })
   @ApiQuery({ name: 'start_date', required: false, type: 'string' })
   @ApiQuery({ name: 'status', required: false, type: 'string' })
+  @ApiQuery({ name: 'name', required: false, type: 'string' })
   getAllGroups(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,

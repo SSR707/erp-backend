@@ -133,12 +133,7 @@ export class GroupService {
           },
         }),
         ...(status && { status }),
-        ...(name && {
-          name: {
-            contains: name,
-            mode: 'insensitive',
-          },
-        }),
+        ...(name && { name: { contains: name, mode: 'insensitive' } }),
       },
     });
 
