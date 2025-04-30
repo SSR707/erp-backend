@@ -232,6 +232,9 @@ export class TeacherService {
     await this.prismaService.user.update({
       where: { user_id: id },
       data: { full_name: updateTeacherDto.full_name },
+      include: {
+        PaymentForTeacher: true,
+      },
     });
     // teacher delete from redis
     const keys = await this.redis.keys('teachers:page:*');
