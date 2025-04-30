@@ -107,6 +107,7 @@ export class GroupService {
     status: GroupStatus,
     name: string,
   ) {
+    console.log('findAllGroup', page, limit, startDate, status, name);
     const redisKey = `groups:page:${page}:limit:${limit}:startDate${startDate}:status:${status}:name:${name}`;
     const cachedGroup = await this.redis.get(redisKey);
 
@@ -132,7 +133,12 @@ export class GroupService {
           },
         }),
         ...(status && { status }),
-        ...(name && { name }),
+        ...(name && {
+          name: {
+            contains: name,
+            mode: 'insensitive',
+          },
+        }),
       },
     });
 

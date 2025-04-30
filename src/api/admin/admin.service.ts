@@ -75,7 +75,7 @@ export class AdminService {
       createAdminDto.password,
     );
     const { image_url, ...AdminDto } = createAdminDto;
-    AdminDto.data_of_birth = new Date(AdminDto.data_of_birth)
+    AdminDto.data_of_birth = new Date(AdminDto.data_of_birth);
     const admin = await this.prismaService.user.create({
       data: {
         ...AdminDto,
@@ -102,6 +102,10 @@ export class AdminService {
         username: true,
         role: true,
         images: true,
+        phone_number: true,
+        gender: true,
+        data_of_birth: true,
+        address : true
       },
     });
     return {
