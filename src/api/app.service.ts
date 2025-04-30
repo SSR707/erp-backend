@@ -22,6 +22,18 @@ export default class Application {
       }),
     );
     app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+    app.use(
+      '/uploads/admin',
+      express.static(path.join(process.cwd(), 'uploads', 'admin')),
+    );
+    app.use(
+      '/uploads/student',
+      express.static(path.join(process.cwd(), 'uploads', 'student')),
+    );
+    app.use(
+      '/uploads/teacher',
+      express.static(path.join(process.cwd(), 'uploads', 'teacher')),
+    );
     const api = 'api/v1';
     const swaggerApi = 'api/docs';
     app.setGlobalPrefix(api);
