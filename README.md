@@ -1,73 +1,112 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# 🎓 ERP LMS Backend (NestJS + Prisma)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This is the backend service of the **ERP + LMS system** for educational centers. Built using **NestJS** and **Prisma ORM**, it offers a clean, modular API for managing students, teachers, courses, payments, and user authentication with role-based access.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+> 🔗 **Live Frontend Demo:** [erp.web-code.uz/courses](https://erp.web-code.uz/courses)
 
-## Description
+## 🔐 Test Login
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+| Role  | Username | Password   |
+|-------|----------|------------|
+| Admin | Admin01  | Admin01!A  |
 
-## Installation
+---
 
-```bash
-$ npm install
-```
+## 🚀 Features
 
-## Running the app
+- 👨‍🎓 **Students** – Full CRUD, group assignment, payment history
+- 👩‍🏫 **Teachers** – Profiles, salary tracking, group assignments
+- 📚 **Courses & Groups** – Management and filtering
+- 💳 **Payments** – Student payments and teacher salaries
+- 🔐 **Authentication** – Login with JWT + OTP (optional)
+- 🧑‍💼 **Admin Panel** – Dashboard stats and management
 
-```bash
-# development
-$ npm run start
+---
 
-# watch mode
-$ npm run start:dev
+## 🛠️ Technologies Used
 
-# production mode
-$ npm run start:prod
-```
+- **NestJS** – Scalable server-side Node.js framework
+- **Prisma** – Next-gen ORM for PostgreSQL
+- **PostgreSQL** – Relational database
+- **JWT** – Secure token-based authentication
+- **Class-validator** – Input validation
+- **Dotenv** – Environment variable management
+- **Docker (optional)** – Deployment support
 
-## Test
+---
+
+## 📦 Installation
 
 ```bash
-# unit tests
-$ npm run test
+# 1. Clone the repository
+git clone https://github.com/SSR707/erp-backend.git
 
-# e2e tests
-$ npm run test:e2e
+# 2. Navigate into the project
+cd erp-backend
 
-# test coverage
-$ npm run test:cov
+# 3. Install dependencies
+npm install
+
+# 4. Configure your environment
+cp .env.example .env
+# Fill in your DB credentials and secrets
+
+# 5. Generate Prisma client and apply schema
+npx prisma generate
+npx prisma migrate dev --name init
+
+# 6. Start the development server
+npm run start:dev
 ```
 
-## Support
+## 🧩 Prisma Setup
+Database models are located in prisma/schema.prisma
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Use npx prisma studio to browse your DB
 
-## Stay in touch
+To update schema:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+npx prisma migrate dev --name your_migration_name
+```
+## 🔗 API Routes (prefix: /api/v1/)
+auth – Register, login, OTP verification, and role-based access
 
-## License
+admin – Admin profile and system-level access
 
-Nest is [MIT licensed](LICENSE).
+students – Manage student profiles, group assignments, and payments
+
+student-payment – Student payment tracking and history
+
+teachers – Teacher profile management and salaries
+
+teacher-payment – Teacher salary payments and tracking
+
+groups – Group creation, editing, and member assignment
+
+group-member – Assigning students/teachers to groups
+
+courses – Full CRUD for courses and linking to groups
+
+dashboard – Overall statistics and financial summaries
+
+## 📈 Roadmap
+✅ Role-based admin system
+
+✅ Payment & salary logic
+
+✅ Full group and course management
+
+⏳ SMS/Email notifications
+
+⏳ Role login for students and teachers
+
+⏳ Reporting & export system
+
+## 🤝 Contribution
+Contributions are welcome!
+Fork the repo and feel free to submit a pull request.
+
+## 🧑‍💻 Author
+Developed & maintained by SSR707
+📧 Email: samandarshavkatov07@gmail.com
