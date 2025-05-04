@@ -103,9 +103,6 @@ dashboard – Overall statistics and financial summaries
 
 ⏳ Reporting & export system
 
-## 🤝 Contribution
-Contributions are welcome!
-Fork the repo and feel free to submit a pull request.
 
 ## 🧑‍💻 Author
 Developed & maintained by SSR707
